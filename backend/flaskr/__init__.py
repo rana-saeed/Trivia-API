@@ -29,6 +29,17 @@ def create_app(test_config=None):
     return response
 
 
+  def paginate_questions(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start =  (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [question.format() for question in selection]
+    current_questions = questions[start:end]
+
+    return current_questions
+
+
   '''
   @TODO: 
   Create an endpoint to handle GET requests 
@@ -61,6 +72,38 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+  @app.route('/questions', methods=['GET'])
+  def get_questions():
+   
+    current_category = None
+
+    # if category found in request, only retrieve questions under that category
+    if 'category' in request.args:
+      try:
+        current_category_id = request.args.get('category', type=int)
+        current_category = (Category.query.filter(Category.id == current_category_id).one_or_none()).type
+        selection = Question.query.filter(Question.category == current_category_id).order_by(Question.id).all()
+      except:
+        abort(400)
+    else:
+      selection = Question.query.order_by(Question.id).all()
+    
+    current_questions = paginate_questions(request, selection)
+    
+    categories = Category.query.order_by(Category.id).all()
+    formatted_categories = [category.format() for category in categories]
+    
+    if len(current_questions) == 0:
+        abort(404)
+
+    return jsonify({
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(current_questions),
+        'current_category': current_category,
+        'categories': formatted_categories,
+    })
+
 
   '''
   @TODO: 
@@ -126,7 +169,23 @@ def create_app(test_config=None):
         "error": 404,
         "message": "resource not found"
     }), 404
-  
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          "success": False,
+          "error": 422,
+          "message": "unprocessable"
+      }), 422
+    
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+          "success": False,
+          "error": 400,
+          "message": "bad request"
+      }), 400
+
   return app
 
     

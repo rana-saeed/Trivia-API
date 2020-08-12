@@ -33,6 +33,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+    # Success: Get all categories from db
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
@@ -48,7 +49,42 @@ class TriviaTestCase(unittest.TestCase):
         # Asserting db presistency
         self.assertEqual(data['total_categories'], categories)
        
+    # Success: Get all questions from db and paginate results (max 10 questions per page)
+    def test_get_paginated_all_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
 
+        questions = Question.query.count()
+        categories = Category.query.count()
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['questions'])
+        self.assertLessEqual(data['total_questions'], 10)
+        self.assertTrue(data['categories'])
+        self.assertEqual(data['current_category'], None)
+
+        # Asserting db presistency
+        self.assertEqual(len(data['categories']), categories)
+
+    # Error: Get questions from a page that doesn't exist
+    def test_404_sent_requesting_beyond_valid_page(self):
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    # Error: Get questions for a category that doesn't exist
+    def test_400_for_invalid_category_get_all_questions(self):
+        res = self.client().get('/questions?category=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'bad request')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

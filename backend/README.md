@@ -90,6 +90,9 @@ GET '/categories'
 ```
 ## Endpoints
 GET '/categories'
+GET '/questions'
+
+
 
 #### GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
@@ -115,6 +118,55 @@ GET '/categories'
   ], 
   "success": true, 
   "total_categories": 2
+}
+```
+
+#### GET '/questions'
+- Fetches a dictionary of questions in which the keys are the ids and the value is the remaining attributes of questions object uncluding: question, answer, diffuclty, category
+- Request Arguments:
+    1. `(Optional)`Category: id of category to get questions under it
+    2. `(Optional)`Page: number of page to view questions on
+- Returns: 
+    1. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    2. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
+    3. A boolean `success`, indicating if questions retrieval from database was successful or not.
+    4. A string `current_category` indicating type of category we are currently displaying questions for. Value will be null in case no category specified.
+    5. An int `total_questions` indicating total number of questions per current page.
+    
+    6. A status code of `200` in case of success or `404` in case no questions or page found or `400` in case of invalid request (e.g. invalid category id).
+
+- Sample Response:
+```
+{ 
+  "questions": [
+    {
+      "answer": "Escher", 
+      "category": 2, 
+      "difficulty": 1, 
+      "id": 16, 
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    }, 
+    {
+      "answer": "Mona Lisa", 
+      "category": 2, 
+      "difficulty": 3, 
+      "id": 17, 
+      "question": "La Giaconda is better known as what?"
+    }
+  ]
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    {
+      "id": 2, 
+      "type": "Art"
+    }
+  ], 
+  "success": true,
+  "current_category": "Art",
+  "total_questions": 2
 }
 ```
 
