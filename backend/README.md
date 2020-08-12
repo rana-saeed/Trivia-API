@@ -88,6 +88,35 @@ GET '/categories'
 '6' : "Sports"}
 
 ```
+## Endpoints
+GET '/categories'
+
+#### GET '/categories'
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: 
+    1. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
+    2. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    3. An int `total_categories` indicating total number of categories found.
+    4. A status code of `200` in case of success or `404` in case no categories found.
+
+- Sample Response:
+```
+{
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    {
+      "id": 2, 
+      "type": "Art"
+    }
+  ], 
+  "success": true, 
+  "total_categories": 2
+}
+```
 
 
 ## Testing

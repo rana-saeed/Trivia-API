@@ -16,16 +16,37 @@ def create_app(test_config=None):
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
+  # CORS(app)
+  cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,PATCH,DELETE,OPTIONS')
+    return response
+
 
   '''
   @TODO: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  @app.route('/categories', methods=['GET'])
+  def get_categories():
+    categories = Category.query.order_by(Category.id).all()
+    formatted_categories = [category.format() for category in categories]
+        
+    if len(formatted_categories) == 0:
+      abort(404)
+
+    return jsonify({
+      'success': True,
+      'categories': formatted_categories,
+      'total_categories': len(formatted_categories)
+     })
 
 
   '''
@@ -98,6 +119,13 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
   
   return app
 
