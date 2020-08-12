@@ -90,7 +90,9 @@ GET '/categories'
 ```
 ## Endpoints
 GET '/categories'
+
 GET '/questions'
+
 DELETE '/questions/<int:question_id>'
 
 
