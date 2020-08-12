@@ -74,7 +74,6 @@ def create_app(test_config=None):
   '''
   @app.route('/questions', methods=['GET'])
   def get_questions():
-   
     current_category = None
 
     # if category found in request, only retrieve questions under that category
@@ -112,6 +111,28 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<int:question_id>', methods=['DELETE'])
+  def delete_question(question_id):
+    question = Question.query.filter(Question.id == question_id).one_or_none() 
+   
+    if question is None:
+      abort(404)
+    else:
+      try:
+        question.delete()
+
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)  
+        
+        print("HEREEEEE")
+        return jsonify({
+            'success': True,
+            'deleted': question.id,
+            'questions': current_questions,
+            'total_questions': len(current_questions)
+        })
+      except:
+        abort(500)
 
   '''
   @TODO: 
@@ -185,6 +206,14 @@ def create_app(test_config=None):
           "error": 400,
           "message": "bad request"
       }), 400
+
+  @app.errorhandler(500)
+  def internal_server_error(error):
+      return jsonify({
+          "success": False,
+          "error": 500,
+          "message": "internal server error"
+      }), 500
 
   return app
 

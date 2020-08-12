@@ -91,6 +91,7 @@ GET '/categories'
 ## Endpoints
 GET '/categories'
 GET '/questions'
+DELETE '/questions/<int:question_id>'
 
 
 
@@ -100,7 +101,7 @@ GET '/questions'
 - Returns: 
     1. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
     2. A boolean `success`, indicating if categoris retrieval from database was successful or not.
-    3. An int `total_categories` indicating total number of categories found.
+    3. An int `total_categories`, indicating total number of categories found.
     4. A status code of `200` in case of success or `404` in case no categories found.
 
 - Sample Response:
@@ -130,8 +131,8 @@ GET '/questions'
     1. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
     2. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
     3. A boolean `success`, indicating if questions retrieval from database was successful or not.
-    4. A string `current_category` indicating type of category we are currently displaying questions for. Value will be null in case no category specified.
-    5. An int `total_questions` indicating total number of questions per current page.
+    4. A string `current_category`, indicating type of category we are currently displaying questions for. Value will be null in case no category specified.
+    5. An int `total_questions`, indicating total number of questions per current page.
     
     6. A status code of `200` in case of success or `404` in case no questions or page found or `400` in case of invalid request (e.g. invalid category id).
 
@@ -170,6 +171,39 @@ GET '/questions'
 }
 ```
 
+#### DELETE '/questions/<int:question_id>'
+- Deletes a question from the database based on specified `question_id` in URL.
+- Request Arguments: None
+- Returns: 
+    1. An int `deleted`, indicating the id of the question deleted.
+    2. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    3. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    4. An int `total_questions`, indicating total number of questions remaining.
+    5. A status code of `200` in case of success or `404` in case no question found or `500` in case of internal database operation error.
+
+- Sample Response:
+```
+{
+  "deleted": 5,
+  "questions": [
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    .
+    .
+    .
+    .
+    .
+    .
+  ],
+  "success": true,
+  "total_questions": 10
+}
+```
 
 ## Testing
 To run the tests, run

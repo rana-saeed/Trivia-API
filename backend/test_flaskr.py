@@ -69,7 +69,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data['categories']), categories)
 
     # Error: Get questions from a page that doesn't exist
-    def test_404_sent_requesting_beyond_valid_page(self):
+    def test_404_if_sent_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=1000')
         data = json.loads(res.data)
         
@@ -78,13 +78,41 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'resource not found')
 
     # Error: Get questions for a category that doesn't exist
-    def test_400_for_invalid_category_get_all_questions(self):
+    def test_400_if_invalid_category_get_all_questions(self):
         res = self.client().get('/questions?category=1000')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bad request')
+
+    
+    # Success: Delete question by id
+    def test_delete_question(self):
+        res = self.client().delete('/questions/2')
+        data = json.loads(res.data)
+
+        question = Question.query.filter(Question.id == 2).one_or_none()
+        print(question)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], 2)
+        self.assertTrue(data['questions'])
+        self.assertLessEqual(data['total_questions'], 10)
+
+        # Asserting db presistency
+        self.assertEqual(question, None)
+
+    # Error: Delete question that doesn't exist
+    def test_404_if_delete_non_existing_question(self):
+        res = self.client().delete('/questions/1000')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
