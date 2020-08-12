@@ -103,7 +103,6 @@ def create_app(test_config=None):
         'categories': formatted_categories,
     })
 
-
   '''
   @TODO: 
   Create an endpoint to DELETE question using a question ID. 
@@ -124,7 +123,6 @@ def create_app(test_config=None):
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)  
         
-        print("HEREEEEE")
         return jsonify({
             'success': True,
             'deleted': question.id,
@@ -144,6 +142,36 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
+  @app.route('/questions', methods=['POST'])
+  def add_question():
+    body = request.get_json()
+
+    question = body.get('question', None)
+    answer = body.get('answer', None)
+    category = body.get('category', None)
+    difficulty = body.get('difficulty', None)
+
+    if None in(question, answer, category, difficulty):
+      abort(400)
+    
+    if isinstance(question, str) == False: 
+      abort(422)
+
+    try:
+      question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+      question.insert()
+
+      selection = Question.query.order_by(Question.id).all()
+      current_questions = paginate_questions(request, selection)       
+
+      return jsonify({
+              'success': True,
+              'added': question.id,
+              'questions': current_questions,
+              'total_questions': len(current_questions)
+      })
+    except:
+        abort(422)
 
   '''
   @TODO: 

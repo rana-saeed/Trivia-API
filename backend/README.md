@@ -95,6 +95,8 @@ GET '/questions'
 
 DELETE '/questions/<int:question_id>'
 
+POST '/questions'
+
 
 
 #### GET '/categories'
@@ -201,6 +203,49 @@ DELETE '/questions/<int:question_id>'
     .
     .
     .
+  ],
+  "success": true,
+  "total_questions": 10
+}
+```
+
+#### POST '/questions'
+- Adds a question to the database based on attached JSON body.
+- Request Arguments: None
+- Request Body: JSON of question object
+  ```
+  {
+    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
+    "answer": "Maya Angelou",
+    "category": 2,
+    "difficulty": 4
+  }
+  ```
+- Returns: 
+    1. An int `added`, indicating the id of the question added.
+    2. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    3. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    4. An int `total_questions`, indicating total number of questions remaining.
+    5. A status code of `200` in case of success or `400` in case no missing paramtes in body or `422` in case of invalid request body.
+
+- Sample Response:
+```
+{
+  "added": 4,
+  "questions": [
+    .
+    .
+    .
+    .
+    .
+    .,
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }
   ],
   "success": true,
   "total_questions": 10

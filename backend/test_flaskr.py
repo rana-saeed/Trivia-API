@@ -24,6 +24,27 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
+
+        self.new_question = {
+            "question": "Whose autobiography is entitled 'Catcher in the Rye'?",
+            "answer": "J.D Salinger",
+            "category": 2,
+            "difficulty": 4
+        }
+
+        self.new_incomplete_question = {
+            "question": "Whose autobiography is entitled 'Catcher in the Rye'?",
+            "category": 2,
+            "difficulty": 4
+        }
+
+        self.new_invalid_question = {
+            "question": 22.66,
+            "answer": "J.D Salinger",
+            "category": 2,
+            "difficulty": 4
+        }
+
     
     def tearDown(self):
         """Executed after reach test"""
@@ -88,22 +109,22 @@ class TriviaTestCase(unittest.TestCase):
 
     
     # Success: Delete question by id
-    def test_delete_question(self):
-        res = self.client().delete('/questions/2')
-        data = json.loads(res.data)
+    # def test_delete_question(self):
+    #     res = self.client().delete('/questions/2')
+    #     data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 2).one_or_none()
-        print(question)
+    #     question = Question.query.filter(Question.id == 2).one_or_none()
+    #     print(question)
 
-        # Asserting response correctness
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 2)
-        self.assertTrue(data['questions'])
-        self.assertLessEqual(data['total_questions'], 10)
+    #     # Asserting response correctness
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertEqual(data['deleted'], 2)
+    #     self.assertTrue(data['questions'])
+    #     self.assertLessEqual(data['total_questions'], 10)
 
         # Asserting db presistency
-        self.assertEqual(question, None)
+        # self.assertEqual(question, None)
 
     # Error: Delete question that doesn't exist
     def test_404_if_delete_non_existing_question(self):
@@ -113,6 +134,42 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    # Success: Add new question
+    def test_add_new_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        print(data)
+
+        question = Question.query.filter(Question.id == data['added']).one_or_none()
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['added'])
+        self.assertTrue(data['questions'])
+        self.assertLessEqual(data['total_questions'], 10)
+
+        # Asserting db presistency
+        self.assertNotEqual(question, None)
+
+    # Error: Add question with missing paramters
+    def test_400_if_missing_parameters_in_add_question(self):
+        res = self.client().post('/questions', json=self.new_incomplete_question)
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'bad request')
+
+    # Error: Add question with invalid paramters
+    def test_422_if_invalid_parameters_in_add_question(self):
+        res = self.client().post('/questions', json=self.new_invalid_question)
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
