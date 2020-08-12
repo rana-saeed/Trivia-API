@@ -142,37 +142,6 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-  @app.route('/questions', methods=['POST'])
-  def add_question():
-    body = request.get_json()
-
-    question = body.get('question', None)
-    answer = body.get('answer', None)
-    category = body.get('category', None)
-    difficulty = body.get('difficulty', None)
-
-    if None in(question, answer, category, difficulty):
-      abort(400)
-    
-    if isinstance(question, str) == False: 
-      abort(422)
-
-    try:
-      question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
-      question.insert()
-
-      selection = Question.query.order_by(Question.id).all()
-      current_questions = paginate_questions(request, selection)       
-
-      return jsonify({
-              'success': True,
-              'added': question.id,
-              'questions': current_questions,
-              'total_questions': len(current_questions)
-      })
-    except:
-        abort(422)
-
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -183,6 +152,65 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  @app.route('/questions', methods=['POST'])
+  def add_question():
+    body = request.get_json()
+
+    question = body.get('question', None)
+    answer = body.get('answer', None)
+    category = body.get('category', None)
+    difficulty = body.get('difficulty', None)
+    
+    search = body.get('search', None) 
+    current_category = body.get('current_category', None) 
+
+    # This handles request to search for questions in database
+    if search:
+      try:
+
+        current_category_id = None
+        
+        # If searching in a specific category
+        if current_category:
+          current_category_id = Category.query.filter(Category.type == current_category).one_or_none().id
+          search_results = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)), Question.category == current_category_id).all()
+        else:
+          search_results = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search))).all()
+        
+        search_results_formatted = paginate_questions(request, search_results)
+    
+        return jsonify({
+            'success': True,
+            'search_term': search,
+            'questions': search_results_formatted,
+            'total_questions': len(search_results_formatted),
+            'current_category': current_category_id
+        })
+      except:
+        abort(500)
+    #This handles request to add new question to database
+    else:
+      if None in(question, answer, category, difficulty):
+        abort(400)
+      
+      if isinstance(question, str) == False: 
+        abort(422)
+
+      try:
+        question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+        question.insert()
+
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)       
+
+        return jsonify({
+                'success': True,
+                'added': question.id,
+                'questions': current_questions,
+                'total_questions': len(current_questions)
+        })
+      except:
+        abort(422)
 
   '''
   @TODO: 

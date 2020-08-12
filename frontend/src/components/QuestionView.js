@@ -41,7 +41,6 @@ class QuestionView extends Component {
   }
 
   selectPage(num) {
-    console.log(num)
     this.setState({page: num}, () => this.getQuestions());
   }
 
@@ -84,12 +83,13 @@ class QuestionView extends Component {
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({search: searchTerm, current_category:this.state.currentCategory}),
       xhrFields: {
         withCredentials: true
       },
       crossDomain: true,
       success: (result) => {
+        console.log(this.state.currentCategory)
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,

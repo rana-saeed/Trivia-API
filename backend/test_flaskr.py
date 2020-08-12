@@ -114,7 +114,6 @@ class TriviaTestCase(unittest.TestCase):
     #     data = json.loads(res.data)
 
     #     question = Question.query.filter(Question.id == 2).one_or_none()
-    #     print(question)
 
     #     # Asserting response correctness
     #     self.assertEqual(res.status_code, 200)
@@ -139,7 +138,6 @@ class TriviaTestCase(unittest.TestCase):
     def test_add_new_question(self):
         res = self.client().post('/questions', json=self.new_question)
         data = json.loads(res.data)
-        print(data)
 
         question = Question.query.filter(Question.id == data['added']).one_or_none()
 
@@ -170,6 +168,46 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'unprocessable')
+
+    # Success: search for string with results in database
+    def test_search_for_questions(self):
+        res = self.client().post('/questions', json={'search': 'the'})
+        data = json.loads(res.data)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['search_term'])
+        self.assertGreater(len(data['questions']), 0)
+        self.assertTrue(data['total_questions'])
+        self.assertEqual(data['current_category'], None)
+
+    # Success: search for string without results in database
+    def test_search_for_questions_without_results(self):
+        res = self.client().post('/questions', json={'search': 'dsfsdfdfdf'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['search_term'])
+        self.assertEqual(data['total_questions'], 0)
+        self.assertEqual(len(data['questions']), 0)
+        self.assertEqual(data['current_category'], None)
+
+    # Success: search for string in specific category with results in database
+    def test_search_for_questions(self):
+        res = self.client().post('/questions', json={'search': 'the', 'current_category': 'Art'})
+        data = json.loads(res.data)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['search_term'])
+        self.assertGreater(len(data['questions']), 0)
+        self.assertTrue(data['total_questions'])
+        self.assertEqual(data['current_category'], 2)
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

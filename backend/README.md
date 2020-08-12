@@ -129,13 +129,13 @@ POST '/questions'
 #### GET '/questions'
 - Fetches a dictionary of questions in which the keys are the ids and the value is the remaining attributes of questions object uncluding: question, answer, diffuclty, category
 - Request Arguments:
-    1. `(Optional)`Category: id of category to get questions under it
-    2. `(Optional)`Page: number of page to view questions on
+    1. `(Optional)`Category: id of category to get questions under it.
+    2. `(Optional)`Page: number of page to view questions on.
 - Returns: 
     1. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
     2. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
     3. A boolean `success`, indicating if questions retrieval from database was successful or not.
-    4. A string `current_category`, indicating type of category we are currently displaying questions for. Value will be null in case no category specified.
+    4. A string `current_category`, indicating type of category we are currently displaying questions for. Value will be `null` in case no category specified.
     5. An int `total_questions`, indicating total number of questions per current page.
     
     6. A status code of `200` in case of success or `404` in case no questions or page found or `400` in case of invalid request (e.g. invalid category id).
@@ -249,6 +249,42 @@ POST '/questions'
   ],
   "success": true,
   "total_questions": 10
+}
+```
+
+#### POST '/questions'
+- The second version of this endpoint searches for a specfied string in questions.
+- Request Body: JSON of search term and current category if specified
+  ```
+  {
+    "search": "Whose",
+    "current_category="Art"
+  }
+  ```
+- Returns: 
+    1. A string `search_term`, indicating the value searched for.
+    2. An object with a single key, `questions`, indicating all found questions that partially or fully match the search term.
+    3. A boolean `success`, indicating if search operation was successful or not.
+    4. An int `total_questions`, indicating total number of search results found.
+    5. An int `current_category`, indicating id of category we are currently displaying results for. Value will be `null` in case no category specified.
+    6. A status code of `200` in case of success or `500` in case of internal database operation error..
+
+- Sample Response:
+```
+{
+  "questions": [
+    {
+      "answer": "Maya Angelou",
+      "category": 2,
+      "difficulty": 4,
+      "id": 25,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }
+  ],
+  "search_term": "Whose",
+  "success": true,
+  "total_questions": 1,
+  "current_category": null
 }
 ```
 
