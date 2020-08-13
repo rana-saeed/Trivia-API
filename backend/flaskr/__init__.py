@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import random
+from random import randint
 
 from models import setup_db, Question, Category
 
@@ -14,13 +14,13 @@ def create_app(test_config=None):
   setup_db(app)
   
   '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+ `Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
   # CORS(app)
   cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
   '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
+   Use the after_request decorator to set Access-Control-Allow
   '''
   @app.after_request
   def after_request(response):
@@ -40,8 +40,7 @@ def create_app(test_config=None):
     return current_questions
 
 
-  '''
-  @TODO: 
+  ''' 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
@@ -61,7 +60,6 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -71,6 +69,13 @@ def create_app(test_config=None):
   you should see questions and categories generated,
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
+  '''
+  '''
+  Create a GET endpoint to get questions based on category. 
+
+  TEST: In the "List" tab / main screen, clicking on one of the 
+  categories in the left column will cause only questions of that 
+  category to be shown. 
   '''
   @app.route('/questions', methods=['GET'])
   def get_questions():
@@ -104,7 +109,6 @@ def create_app(test_config=None):
     })
 
   '''
-  @TODO: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
@@ -132,8 +136,7 @@ def create_app(test_config=None):
       except:
         abort(500)
 
-  '''
-  @TODO: 
+  ''' 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -143,7 +146,6 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
   '''
-  @TODO: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -212,15 +214,6 @@ def create_app(test_config=None):
       except:
         abort(422)
 
-  '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
-
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
-
 
   '''
   @TODO: 
@@ -233,9 +226,48 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def get_questions_fors_quiz():
+    body = request.get_json()
+
+    questions_per_play = body.get('questions_per_play', None)
+    previous_questions = body.get('previous_questions', None)
+    quiz_category = body.get('quiz_category', None)
+
+    if None in(questions_per_play, previous_questions, quiz_category):
+        abort(400)
+    
+    try:
+      # Get questions for all categories
+      if quiz_category['id'] == 0:
+        questions = Question.query.all()
+        
+      # Get questions for specific category
+      else:
+        questions = Question.query.filter(Question.category == quiz_category['id']).all()
+    
+      # Handles case if available questions are less than questions per play
+      force_end = False
+      if len(questions) < questions_per_play and (len(questions) - len(previous_questions)) == 1:
+        force_end = True
+
+      random_question_num = randint(1,len(questions)-1)
+
+      # Validate that new question was not in previous questions
+      while questions[random_question_num].id in previous_questions:
+        random_question_num = randint(0,len(questions)-1)
+
+      question = questions[random_question_num].format()
+
+      return jsonify({
+              'success': True,
+              'question': question,
+              'force_end': force_end
+          })
+    except:
+      abort(422)
 
   '''
-  @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''

@@ -109,21 +109,21 @@ class TriviaTestCase(unittest.TestCase):
 
     
     # Success: Delete question by id
-    # def test_delete_question(self):
-    #     res = self.client().delete('/questions/2')
-    #     data = json.loads(res.data)
+    def test_delete_question(self):
+        res = self.client().delete('/questions/2')
+        data = json.loads(res.data)
 
-    #     question = Question.query.filter(Question.id == 2).one_or_none()
+        question = Question.query.filter(Question.id == 2).one_or_none()
 
-    #     # Asserting response correctness
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertEqual(data['deleted'], 2)
-    #     self.assertTrue(data['questions'])
-    #     self.assertLessEqual(data['total_questions'], 10)
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], 2)
+        self.assertTrue(data['questions'])
+        self.assertLessEqual(data['total_questions'], 10)
 
         # Asserting db presistency
-        # self.assertEqual(question, None)
+        self.assertEqual(question, None)
 
     # Error: Delete question that doesn't exist
     def test_404_if_delete_non_existing_question(self):
@@ -169,7 +169,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'unprocessable')
 
-    # Success: search for string with results in database
+    # Success: Search for string with results in database
     def test_search_for_questions(self):
         res = self.client().post('/questions', json={'search': 'the'})
         data = json.loads(res.data)
@@ -182,7 +182,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['current_category'], None)
 
-    # Success: search for string without results in database
+    # Success: Search for string without results in database
     def test_search_for_questions_without_results(self):
         res = self.client().post('/questions', json={'search': 'dsfsdfdfdf'})
         data = json.loads(res.data)
@@ -194,7 +194,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data['questions']), 0)
         self.assertEqual(data['current_category'], None)
 
-    # Success: search for string in specific category with results in database
+    # Success: Search for string in specific category with results in database
     def test_search_for_questions(self):
         res = self.client().post('/questions', json={'search': 'the', 'current_category': 'Art'})
         data = json.loads(res.data)
@@ -207,6 +207,48 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['current_category'], 2)
 
+
+    # Success: Quiz returns next question in all categories
+    def test_next_question_in_quiz_all_categories(self):
+        res = self.client().post('/quizzes', json={'questions_per_play': 5, 'previous_questions': [10, 12], 'quiz_category': {'id': 0, 'type': 'click'}})
+        data = json.loads(res.data)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertFalse(data['force_end'])
+        self.assertNotIn(data['question'], [10, 12])
+
+    # Success: Quiz returns next question in specified category
+    def test_next_question_in_quiz_specified_category(self):
+        res = self.client().post('/quizzes', json={'questions_per_play': 5, 'previous_questions': [], 'quiz_category': {'id': 2, 'type': 'Art'}})
+        data = json.loads(res.data)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertFalse(data['force_end'])
+        self.assertEqual(data['question']['category'], 2)
+
+    # Error: Quiz start with missing paramters
+    def test_400_if_missing_parameters_in_quiz(self):
+        res = self.client().post('/quizzes', json={'questions_per_play': 5, 'quiz_category': {'id': 2, 'type': 'Art'}})
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'bad request')
+
+    # Error: Quiz start with invalid paramters
+    def test_422_if_invalid_parameters_in_quiz(self):
+        res = self.client().post('/quizzes', json={'questions_per_play': 'fff', 'previous_questions': ['ffs', 'sfs'], 'quiz_category': {'id': 2, 'type': 'Art'}})
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
 
 
 # Make the tests conveniently executable

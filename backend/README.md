@@ -97,7 +97,7 @@ DELETE '/questions/<int:question_id>'
 
 POST '/questions'
 
-
+POST '/quizzes'
 
 #### GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
@@ -226,7 +226,7 @@ POST '/questions'
     2. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
     3. A boolean `success`, indicating if categoris retrieval from database was successful or not.
     4. An int `total_questions`, indicating total number of questions remaining.
-    5. A status code of `200` in case of success or `400` in case no missing paramtes in body or `422` in case of invalid request body.
+    5. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
 
 - Sample Response:
 ```
@@ -254,11 +254,12 @@ POST '/questions'
 
 #### POST '/questions'
 - The second version of this endpoint searches for a specfied string in questions.
+- Request Arguments: None
 - Request Body: JSON of search term and current category if specified
   ```
   {
     "search": "Whose",
-    "current_category="Art"
+    "current_category": "Art"
   }
   ```
 - Returns: 
@@ -267,7 +268,7 @@ POST '/questions'
     3. A boolean `success`, indicating if search operation was successful or not.
     4. An int `total_questions`, indicating total number of search results found.
     5. An int `current_category`, indicating id of category we are currently displaying results for. Value will be `null` in case no category specified.
-    6. A status code of `200` in case of success or `500` in case of internal database operation error..
+    6. A status code of `200` in case of success or `500` in case of internal database operation error.
 
 - Sample Response:
 ```
@@ -285,6 +286,43 @@ POST '/questions'
   "success": true,
   "total_questions": 1,
   "current_category": null
+}
+```
+
+#### POST '/quizzes'
+- Retreives next random question that was not previously asked in games session for a specific or for all categoris to play trivia game.
+- Request Arguments: None
+- Request Body: JSON of search term and current category if specified
+  ```
+  {
+    "questions_per_play": 5,
+    "previous_questions": [19],
+    "quiz_category": {"id": 2, "type": "Art"}
+  }
+  ```
+  ###### NOTE
+  For all categories use:
+  ```
+  "quiz_category": {"id": 0, "type": "click"}
+  ```
+- Returns: 
+    1. An object with a single key, `questions`, indicating next question to be asked in game session.s
+    2. A boolean `force_end`, indicating if this is the last question in game session.
+    3. A boolean `success`, indicating if retrieving next question was successful or not.
+    4. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
+
+- Sample Response:
+```
+{
+  "force_end": false,
+  "question": {
+    "answer": "One",
+    "category": 2,
+    "difficulty": 4,
+    "id": 18,
+    "question": "How many paintings did Van Gogh sell in his lifetime?"
+  },
+  "success": true
 }
 ```
 
