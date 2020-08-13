@@ -248,8 +248,13 @@ def create_app(test_config=None):
     
       # Handles case if available questions are less than questions per play
       force_end = False
-      if len(questions) < questions_per_play and (len(questions) - len(previous_questions)) == 1:
+      if len(questions) < questions_per_play and (len(questions) - len(previous_questions)) == 0:
         force_end = True
+        return jsonify({
+              'success': True,
+              'question': None,
+              'force_end': force_end
+          })
 
       random_question_num = randint(0,len(questions)-1)
 
@@ -257,6 +262,7 @@ def create_app(test_config=None):
       while questions[random_question_num].id in previous_questions:
         random_question_num = randint(0,len(questions)-1)
 
+      print(random_question_num )
       question = questions[random_question_num].format()
 
       return jsonify({
