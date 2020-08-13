@@ -216,7 +216,6 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
@@ -230,11 +229,11 @@ def create_app(test_config=None):
   def get_questions_fors_quiz():
     body = request.get_json()
 
-    questions_per_play = body.get('questions_per_play', None)
+    questions_per_play = body.get('questions_per_play', 1)
     previous_questions = body.get('previous_questions', None)
     quiz_category = body.get('quiz_category', None)
 
-    if None in(questions_per_play, previous_questions, quiz_category):
+    if None in(previous_questions, quiz_category):
         abort(400)
     
     try:
@@ -252,8 +251,7 @@ def create_app(test_config=None):
         force_end = True
         return jsonify({
               'success': True,
-              'question': None,
-              'force_end': force_end
+              'question': None
           })
 
       random_question_num = randint(0,len(questions)-1)
@@ -262,13 +260,11 @@ def create_app(test_config=None):
       while questions[random_question_num].id in previous_questions:
         random_question_num = randint(0,len(questions)-1)
 
-      print(random_question_num )
       question = questions[random_question_num].format()
 
       return jsonify({
               'success': True,
-              'question': question,
-              'force_end': force_end
+              'question': question
           })
     except:
       abort(422)

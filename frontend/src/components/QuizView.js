@@ -67,7 +67,7 @@ class QuizView extends Component {
           previousQuestions: previousQuestions,
           currentQuestion: result.question,
           guess: '',
-          forceEnd: result.force_end 
+          forceEnd: result.question ? false : true
         })
         return;
       },

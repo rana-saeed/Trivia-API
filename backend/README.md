@@ -292,7 +292,7 @@ POST '/quizzes'
 #### POST '/quizzes'
 - Retreives next random question that was not previously asked in games session for a specific or for all categoris to play trivia game.
 - Request Arguments: None
-- Request Body: JSON of search term and current category if specified
+- Request Body: JSON of quiz category object, list of previously asked questions in game session and `Optiona` number of questions per quiz.s
   ```
   {
     "questions_per_play": 5,
@@ -307,14 +307,12 @@ POST '/quizzes'
   ```
 - Returns: 
     1. An object with a single key, `questions`, indicating next question to be asked in game session.s
-    2. A boolean `force_end`, indicating if this is the last question in game session.
-    3. A boolean `success`, indicating if retrieving next question was successful or not.
-    4. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
+    2. A boolean `success`, indicating if retrieving next question was successful or not.
+    3. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
 
 - Sample Response:
 ```
 {
-  "force_end": false,
   "question": {
     "answer": "One",
     "category": 2,
