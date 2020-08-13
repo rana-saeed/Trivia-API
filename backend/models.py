@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, create_engine, exc
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -41,13 +41,14 @@ class Question(db.Model):
   def insert(self):
     db.session.add(self)
     db.session.commit()
-  
+    
   def update(self):
     db.session.commit()
 
   def delete(self):
     db.session.delete(self)
     db.session.commit()
+    
 
   def format(self):
     return {

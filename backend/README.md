@@ -88,7 +88,243 @@ GET '/categories'
 '6' : "Sports"}
 
 ```
+## Endpoints
+GET '/categories'
 
+GET '/questions'
+
+DELETE '/questions/<int:question_id>'
+
+POST '/questions'
+
+POST '/quizzes'
+
+#### GET '/categories'
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: 
+    1. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
+    2. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    3. An int `total_categories`, indicating total number of categories found.
+    4. A status code of `200` in case of success or `404` in case no categories found.
+
+- Sample Response:
+```
+{
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    {
+      "id": 2, 
+      "type": "Art"
+    }
+  ], 
+  "success": true, 
+  "total_categories": 2
+}
+```
+
+#### GET '/questions'
+- Fetches a dictionary of questions in which the keys are the ids and the value is the remaining attributes of questions object uncluding: question, answer, diffuclty, category
+- Request Arguments:
+    1. `(Optional)`Category: id of category to get questions under it.
+    2. `(Optional)`Page: number of page to view questions on.
+- Returns: 
+    1. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    2. An object with a single key, `categories`, that contains a object of id: category_string key:value pairs. 
+    3. A boolean `success`, indicating if questions retrieval from database was successful or not.
+    4. A string `current_category`, indicating type of category we are currently displaying questions for. Value will be `null` in case no category specified.
+    5. An int `total_questions`, indicating total number of questions per current page.
+    
+    6. A status code of `200` in case of success or `404` in case no questions or page found or `400` in case of invalid request (e.g. invalid category id).
+
+- Sample Response:
+```
+{ 
+  "questions": [
+    {
+      "answer": "Escher", 
+      "category": 2, 
+      "difficulty": 1, 
+      "id": 16, 
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    }, 
+    {
+      "answer": "Mona Lisa", 
+      "category": 2, 
+      "difficulty": 3, 
+      "id": 17, 
+      "question": "La Giaconda is better known as what?"
+    }
+  ]
+  "categories": [
+    {
+      "id": 1, 
+      "type": "Science"
+    }, 
+    {
+      "id": 2, 
+      "type": "Art"
+    }
+  ], 
+  "success": true,
+  "current_category": "Art",
+  "total_questions": 2
+}
+```
+
+#### DELETE '/questions/<int:question_id>'
+- Deletes a question from the database based on specified `question_id` in URL.
+- Request Arguments: None
+- Returns: 
+    1. An int `deleted`, indicating the id of the question deleted.
+    2. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    3. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    4. An int `total_questions`, indicating total number of questions remaining.
+    5. A status code of `200` in case of success or `404` in case no question found or `500` in case of internal database operation error.
+
+- Sample Response:
+```
+{
+  "deleted": 5,
+  "questions": [
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    .
+    .
+    .
+    .
+    .
+    .
+  ],
+  "success": true,
+  "total_questions": 10
+}
+```
+
+#### POST '/questions'
+- Adds a question to the database based on attached JSON body.
+- Request Arguments: None
+- Request Body: JSON of question object
+  ```
+  {
+    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
+    "answer": "Maya Angelou",
+    "category": 2,
+    "difficulty": 4
+  }
+  ```
+- Returns: 
+    1. An int `added`, indicating the id of the question added.
+    2. An object with a single key, `questions`, that contains an array of object question of id, question, answer, diffuclty and category.
+    3. A boolean `success`, indicating if categoris retrieval from database was successful or not.
+    4. An int `total_questions`, indicating total number of questions remaining.
+    5. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
+
+- Sample Response:
+```
+{
+  "added": 4,
+  "questions": [
+    .
+    .
+    .
+    .
+    .
+    .,
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }
+  ],
+  "success": true,
+  "total_questions": 10
+}
+```
+
+#### POST '/questions'
+- The second version of this endpoint searches for a specfied string in questions.
+- Request Arguments: None
+- Request Body: JSON of search term and current category if specified
+  ```
+  {
+    "search": "Whose",
+    "current_category": "Art"
+  }
+  ```
+- Returns: 
+    1. A string `search_term`, indicating the value searched for.
+    2. An object with a single key, `questions`, indicating all found questions that partially or fully match the search term.
+    3. A boolean `success`, indicating if search operation was successful or not.
+    4. An int `total_questions`, indicating total number of search results found.
+    5. An int `current_category`, indicating id of category we are currently displaying results for. Value will be `null` in case no category specified.
+    6. A status code of `200` in case of success or `500` in case of internal database operation error.
+
+- Sample Response:
+```
+{
+  "questions": [
+    {
+      "answer": "Maya Angelou",
+      "category": 2,
+      "difficulty": 4,
+      "id": 25,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }
+  ],
+  "search_term": "Whose",
+  "success": true,
+  "total_questions": 1,
+  "current_category": null
+}
+```
+
+#### POST '/quizzes'
+- Retreives next random question that was not previously asked in games session for a specific or for all categoris to play trivia game.
+- Request Arguments: None
+- Request Body: JSON of search term and current category if specified
+  ```
+  {
+    "questions_per_play": 5,
+    "previous_questions": [19],
+    "quiz_category": {"id": 2, "type": "Art"}
+  }
+  ```
+  ###### NOTE
+  For all categories use:
+  ```
+  "quiz_category": {"id": 0, "type": "click"}
+  ```
+- Returns: 
+    1. An object with a single key, `questions`, indicating next question to be asked in game session.s
+    2. A boolean `force_end`, indicating if this is the last question in game session.
+    3. A boolean `success`, indicating if retrieving next question was successful or not.
+    4. A status code of `200` in case of success or `400` in case no missing parameters in body or `422` in case of invalid request body.
+
+- Sample Response:
+```
+{
+  "force_end": false,
+  "question": {
+    "answer": "One",
+    "category": 2,
+    "difficulty": 4,
+    "id": 18,
+    "question": "How many paintings did Van Gogh sell in his lifetime?"
+  },
+  "success": true
+}
+```
 
 ## Testing
 To run the tests, run
