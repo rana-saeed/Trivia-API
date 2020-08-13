@@ -22,6 +22,7 @@ class TriviaTestCase(unittest.TestCase):
         with self.app.app_context():
             self.db = SQLAlchemy()
             self.db.init_app(self.app)
+            
             # create all tables
             self.db.create_all()
 
@@ -50,10 +51,9 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
+    '''
+    GET '/categories' tests
+    '''
     # Success: Get all categories from db
     def test_get_categories(self):
         res = self.client().get('/categories')
@@ -70,6 +70,10 @@ class TriviaTestCase(unittest.TestCase):
         # Asserting db presistency
         self.assertEqual(data['total_categories'], categories)
        
+    
+    '''
+    GET '/questions' tests
+    '''
     # Success: Get all questions from db and paginate results (max 10 questions per page)
     def test_get_paginated_all_questions(self):
         res = self.client().get('/questions')
@@ -108,6 +112,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'bad request')
 
     
+    '''
+    DELETE '/questions/<int:question_id>' tests
+    '''
     # Success: Delete question by id
     def test_delete_question(self):
         res = self.client().delete('/questions/2')
@@ -134,6 +141,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
+    '''
+    POST '/questions' add question tests
+    '''
     # Success: Add new question
     def test_add_new_question(self):
         res = self.client().post('/questions', json=self.new_question)
@@ -169,6 +179,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'unprocessable')
 
+    '''
+    POST '/questions' search for question tests
+    '''
     # Success: Search for string with results in database
     def test_search_for_questions(self):
         res = self.client().post('/questions', json={'search': 'the'})
@@ -208,6 +221,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], 2)
 
 
+    '''
+    POST '/quizzes' tests
+    '''
     # Success: Quiz returns next question in all categories
     def test_next_question_in_quiz_all_categories(self):
         res = self.client().post('/quizzes', json={'questions_per_play': 5, 'previous_questions': [10, 12], 'quiz_category': {'id': 0, 'type': 'click'}})
@@ -217,7 +233,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question'])
-        self.assertFalse(data['force_end'])
         self.assertNotIn(data['question'], [10, 12])
 
     # Success: Quiz returns next question in specified category
@@ -229,8 +244,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question'])
-        self.assertFalse(data['force_end'])
         self.assertEqual(data['question']['category'], 2)
+
+    # Success: Quiz returns next question in specified category with all questions already asked
+    def test_next_question_in_quiz_specified_category_with_previous_questions(self):
+        res = self.client().post('/quizzes', json={'questions_per_play': 5, 'previous_questions': [13, 14, 15], 'quiz_category': {'id': 3, 'type': 'Geography'}})
+        data = json.loads(res.data)
+
+        # Asserting response correctness
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['question'], None)
 
     # Error: Quiz start with missing paramters
     def test_400_if_missing_parameters_in_quiz(self):
