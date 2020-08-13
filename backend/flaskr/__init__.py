@@ -251,7 +251,7 @@ def create_app(test_config=None):
       if len(questions) < questions_per_play and (len(questions) - len(previous_questions)) == 1:
         force_end = True
 
-      random_question_num = randint(1,len(questions)-1)
+      random_question_num = randint(0,len(questions)-1)
 
       # Validate that new question was not in previous questions
       while questions[random_question_num].id in previous_questions:
